@@ -1,6 +1,6 @@
 # tutor storefront
 
-A digital store for tutors server side rendered with rust.
+A WIP server side rendered web app built with rust.
 
 ## Stack:
 

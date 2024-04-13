@@ -17,3 +17,10 @@ serde = { version = "1.0.197", features = ["derive"] }
 slog = "2.7.0"
 slog-async = "2.8.0"
 slog-term = "2.9.1"
+sqlx = { version = "0.7.4", default_features = false, features = [
+    "postgres",
+    "runtime-tokio-native-tls",
+    "macros",
+    "chrono",
+] }
+openssl = { version = "0.10.64", features = ["vendored"] }
