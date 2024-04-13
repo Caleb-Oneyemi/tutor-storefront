@@ -1,0 +1,13 @@
+[package]
+name = "web-service"
+version = "0.1.0"
+edition = "2021"
+default-run = "server"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "server"
+
+[dependencies]
+actix-web = "4.5.1"
