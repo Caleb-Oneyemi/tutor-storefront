@@ -11,3 +11,7 @@ name = "server"
 
 [dependencies]
 actix-web = "4.5.1"
+serde = { version = "1.0.197", features = ["derive"] }
+slog = "2.7.0"
+slog-async = "2.8.0"
+slog-term = "2.9.1"
