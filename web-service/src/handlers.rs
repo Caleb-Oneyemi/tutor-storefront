@@ -4,7 +4,7 @@ use actix_web::{web, HttpResponse, Responder};
 use chrono::Utc;
 use slog::info;
 
-pub async fn health_check_handler(app_state: web::Data<AppState>) -> impl Responder {
+pub async fn health_check(app_state: web::Data<AppState>) -> impl Responder {
     info!(app_state.logger, "calling health check...");
 
     let mut visit_count = app_state.visit_count.lock().unwrap();
@@ -16,7 +16,7 @@ pub async fn health_check_handler(app_state: web::Data<AppState>) -> impl Respon
     HttpResponse::Ok().json(response)
 }
 
-pub async fn create_course_handler(
+pub async fn create_course(
     new_course: web::Json<Course>,
     app_state: web::Data<AppState>,
 ) -> HttpResponse {
@@ -46,6 +46,51 @@ pub async fn create_course_handler(
     HttpResponse::Created().json(resp)
 }
 
+pub async fn get_all_courses(app_state: web::Data<AppState>) -> HttpResponse {
+    info!(app_state.logger, "calling get all courses...");
+
+    let courses = app_state
+        .courses
+        .lock()
+        .unwrap()
+        .clone()
+        .into_iter()
+        .collect::<Vec<Course>>();
+
+    if courses.len() == 0 {
+        return HttpResponse::Ok().json(Vec::<Course>::new());
+    }
+
+    HttpResponse::Ok().json(courses)
+}
+
+pub async fn get_courses_by_tutor(
+    app_state: web::Data<AppState>,
+    path: web::Path<i32>,
+) -> HttpResponse {
+    let tutor_id = path.into_inner();
+
+    info!(
+        app_state.logger,
+        "calling get course by tutor_id {}...", tutor_id
+    );
+
+    let courses = app_state
+        .courses
+        .lock()
+        .unwrap()
+        .clone()
+        .into_iter()
+        .filter(|c| c.tutor_id == tutor_id)
+        .collect::<Vec<Course>>();
+
+    if courses.len() == 0 {
+        return HttpResponse::Ok().json(Vec::<Course>::new());
+    }
+
+    HttpResponse::Ok().json(courses)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::logger::get_logger;
@@ -69,7 +114,32 @@ mod tests {
             logger: get_logger(),
         });
 
-        let resp = create_course_handler(course, app_state).await;
+        let resp = create_course(course, app_state).await;
         assert_eq!(resp.status(), StatusCode::CREATED);
+    }
+
+    #[actix_web::test]
+    async fn get_all_courses_test() {
+        let app_state: web::Data<AppState> = web::Data::new(AppState {
+            visit_count: Mutex::new(0),
+            courses: Mutex::new(vec![]),
+            logger: get_logger(),
+        });
+
+        let resp = get_all_courses(app_state).await;
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[actix_web::test]
+    async fn get_courses_by_tutor_test() {
+        let app_state: web::Data<AppState> = web::Data::new(AppState {
+            visit_count: Mutex::new(0),
+            courses: Mutex::new(vec![]),
+            logger: get_logger(),
+        });
+
+        let path: web::Path<i32> = web::Path::from(1);
+        let resp = get_courses_by_tutor(app_state, path).await;
+        assert_eq!(resp.status(), StatusCode::OK);
     }
 }
