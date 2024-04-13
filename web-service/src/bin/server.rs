@@ -1,4 +1,5 @@
 use actix_web::{web, App, HttpServer};
+use slog::info;
 use std::{io, sync::Mutex};
 
 #[path = "../state.rs"]
@@ -22,23 +23,23 @@ use state::AppState;
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
-    println!("Starting Server...");
-
     std::env::set_var("RUST_LOG", "actix_web=info");
 
     let logger = get_logger();
+
+    info!(logger, "Starting Server...");
+
     let shared_data = web::Data::new(AppState {
-        health_check_response: "server is up and running".to_string(),
         visit_count: Mutex::new(0),
         courses: Mutex::new(Vec::new()),
-        logger,
+        logger: logger.clone(),
     });
 
     let app = move || App::new().app_data(shared_data.clone()).configure(router);
 
     let server = HttpServer::new(app).bind("127.0.0.1:3000")?.run().await;
 
-    println!("Exiting Server...");
+    info!(logger, "Exiting Server...");
 
     server
 }
