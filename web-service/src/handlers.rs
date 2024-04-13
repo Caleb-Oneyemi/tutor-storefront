@@ -45,3 +45,31 @@ pub async fn create_course_handler(
 
     HttpResponse::Created().json(resp)
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::logger::get_logger;
+
+    use super::*;
+    use actix_web::http::StatusCode;
+    use std::sync::Mutex;
+
+    #[actix_web::test]
+    async fn post_course_test() {
+        let course = web::Json(Course {
+            tutor_id: 1,
+            name: "rust 101".to_string(),
+            id: None,
+            created_at: None,
+        });
+
+        let app_state: web::Data<AppState> = web::Data::new(AppState {
+            visit_count: Mutex::new(0),
+            courses: Mutex::new(vec![]),
+            logger: get_logger(),
+        });
+
+        let resp = create_course_handler(course, app_state).await;
+        assert_eq!(resp.status(), StatusCode::CREATED);
+    }
+}
