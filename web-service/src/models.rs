@@ -1,13 +1,13 @@
 use actix_web::web;
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use std::time::SystemTime;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Course {
     pub id: Option<i32>,
     pub tutor_id: i32,
     pub name: String,
-    pub created_at: Option<SystemTime>,
+    pub created_at: Option<NaiveDateTime>,
 }
 
 impl From<web::Json<Course>> for Course {

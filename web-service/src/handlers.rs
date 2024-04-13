@@ -1,8 +1,8 @@
 use super::models::Course;
 use super::state::AppState;
 use actix_web::{web, HttpResponse, Responder};
+use chrono::Utc;
 use slog::info;
-use std::time::SystemTime;
 
 pub async fn health_check_handler(app_state: web::Data<AppState>) -> impl Responder {
     info!(app_state.logger, "calling health check...");
@@ -38,7 +38,7 @@ pub async fn create_course_handler(
         id: Some((course_count + 1).try_into().unwrap()),
         tutor_id: new_course.tutor_id,
         name: new_course.name.clone(),
-        created_at: Some(SystemTime::now()),
+        created_at: Some(Utc::now().naive_utc()),
     };
 
     app_state.courses.lock().unwrap().push(resp.clone());
