@@ -1,11 +1,12 @@
+use super::errors::CustomError;
 use super::models::Course;
 use super::state::AppState;
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse};
 use slog::info;
 
 use super::data as courses;
 
-pub async fn health_check(app_state: web::Data<AppState>) -> impl Responder {
+pub async fn health_check(app_state: web::Data<AppState>) -> Result<HttpResponse, CustomError> {
     info!(app_state.logger, "calling health check...");
 
     let mut visit_count = app_state.visit_count.lock().unwrap();
@@ -14,13 +15,13 @@ pub async fn health_check(app_state: web::Data<AppState>) -> impl Responder {
 
     let response = format!("visit {}: server is up and running", visit_count);
 
-    HttpResponse::Ok().json(response)
+    Ok(HttpResponse::Ok().json(response))
 }
 
 pub async fn create_course(
     new_course: web::Json<Course>,
     app_state: web::Data<AppState>,
-) -> HttpResponse {
+) -> Result<HttpResponse, CustomError> {
     info!(
         app_state.logger,
         "calling create course with ---- {:?}", new_course
@@ -33,23 +34,23 @@ pub async fn create_course(
         created_at: None,
     };
 
-    let res = courses::create(&app_state.db, new_course).await;
-
-    HttpResponse::Created().json(res)
+    courses::create(&app_state.db, new_course)
+        .await
+        .map(|res| HttpResponse::Ok().json(res))
 }
 
-pub async fn get_all_courses(app_state: web::Data<AppState>) -> HttpResponse {
+pub async fn get_all_courses(app_state: web::Data<AppState>) -> Result<HttpResponse, CustomError> {
     info!(app_state.logger, "calling get all courses...");
 
-    let res = courses::get_all(&app_state.db).await;
-
-    HttpResponse::Ok().json(res)
+    courses::get_all(&app_state.db)
+        .await
+        .map(|res| HttpResponse::Ok().json(res))
 }
 
 pub async fn get_courses_by_tutor(
     app_state: web::Data<AppState>,
     path: web::Path<i32>,
-) -> HttpResponse {
+) -> Result<HttpResponse, CustomError> {
     let tutor_id = path.into_inner();
 
     info!(
@@ -57,7 +58,20 @@ pub async fn get_courses_by_tutor(
         "calling get course by tutor_id {}...", tutor_id
     );
 
-    let courses = courses::get_by_tutor(&app_state.db, tutor_id).await;
+    courses::get_by_tutor(&app_state.db, tutor_id)
+        .await
+        .map(|res| HttpResponse::Ok().json(res))
+}
 
-    HttpResponse::Ok().json(courses)
+pub async fn get_by_course_id(
+    app_state: web::Data<AppState>,
+    path: web::Path<i32>,
+) -> Result<HttpResponse, CustomError> {
+    let id = path.into_inner();
+
+    info!(app_state.logger, "calling get course by id {}...", id);
+
+    courses::get_by_course_id(&app_state.db, id)
+        .await
+        .map(|res| HttpResponse::Ok().json(res))
 }

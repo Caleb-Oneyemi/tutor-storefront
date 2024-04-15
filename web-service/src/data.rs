@@ -1,13 +1,13 @@
+use super::errors::CustomError;
 use super::models::Course;
 use sqlx::postgres::PgPool;
 
-pub async fn get_all(pool: &PgPool) -> Vec<Course> {
-    let courses = sqlx::query!("SELECT * from tutor_storefront")
+pub async fn get_all(pool: &PgPool) -> Result<Vec<Course>, CustomError> {
+    let db_rows = sqlx::query!("SELECT * from tutor_storefront")
         .fetch_all(pool)
-        .await
-        .unwrap();
+        .await?;
 
-    courses
+    let courses = db_rows
         .iter()
         .map(|c| Course {
             id: Some(c.id),
@@ -15,19 +15,20 @@ pub async fn get_all(pool: &PgPool) -> Vec<Course> {
             name: c.name.clone(),
             created_at: Some(chrono::NaiveDateTime::from(c.created_at.unwrap())),
         })
-        .collect()
+        .collect();
+
+    Ok(courses)
 }
 
-pub async fn get_by_tutor(pool: &PgPool, tutor_id: i32) -> Vec<Course> {
-    let courses = sqlx::query!(
+pub async fn get_by_tutor(pool: &PgPool, tutor_id: i32) -> Result<Vec<Course>, CustomError> {
+    let db_rows = sqlx::query!(
         "SELECT * from tutor_storefront where tutor_id = ($1)",
         tutor_id
     )
     .fetch_all(pool)
-    .await
-    .unwrap();
+    .await?;
 
-    courses
+    let courses = db_rows
         .iter()
         .map(|c| Course {
             id: Some(c.id),
@@ -35,35 +36,40 @@ pub async fn get_by_tutor(pool: &PgPool, tutor_id: i32) -> Vec<Course> {
             name: c.name.clone(),
             created_at: c.created_at,
         })
-        .collect()
+        .collect();
+
+    Ok(courses)
 }
 
-pub async fn create(pool: &PgPool, new_course: Course) -> Course {
+pub async fn create(pool: &PgPool, new_course: Course) -> Result<Course, CustomError> {
     let course = sqlx::query!(
         "INSERT INTO tutor_storefront (tutor_id, name) values ($1, $2) returning id, tutor_id, name, created_at",
         new_course.tutor_id,
         new_course.name
     )
     .fetch_one(pool)
-    .await
-    .unwrap();
+    .await?;
 
-    Course {
+    Ok(Course {
         id: Some(course.id),
         tutor_id: course.tutor_id,
         name: course.name,
         created_at: course.created_at,
-    }
+    })
 }
 
-pub async fn _count_by_tutor(pool: &PgPool, tutor_id: i32) -> std::option::Option<i64> {
-    let res = sqlx::query!(
-        "SELECT COUNT(*) from tutor_storefront where tutor_id = ($1)",
-        tutor_id
-    )
-    .fetch_one(pool)
-    .await
-    .unwrap();
+pub async fn get_by_course_id(pool: &PgPool, course_id: i32) -> Result<Course, CustomError> {
+    let db_row = sqlx::query!("SELECT * FROM tutor_storefront where id = $1", course_id,)
+        .fetch_one(pool)
+        .await;
 
-    res.count
+    match db_row {
+        Err(_) => Err(CustomError::NotFoundError("course not found".to_string())),
+        Ok(res) => Ok(Course {
+            id: Some(res.id),
+            tutor_id: res.tutor_id,
+            name: res.name.clone(),
+            created_at: Some(res.created_at.unwrap()),
+        }),
+    }
 }

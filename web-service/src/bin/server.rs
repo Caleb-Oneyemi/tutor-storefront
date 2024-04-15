@@ -18,6 +18,9 @@ mod models;
 #[path = "../data.rs"]
 mod data;
 
+#[path = "../errors.rs"]
+mod errors;
+
 #[path = "../logger.rs"]
 mod logger;
 
