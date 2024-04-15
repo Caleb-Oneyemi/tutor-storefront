@@ -1,4 +1,4 @@
-use super::handlers::*;
+use super::handlers::courses::*;
 use actix_web::web;
 
 pub fn base_router(cfg: &mut web::ServiceConfig) {

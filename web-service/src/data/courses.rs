@@ -1,5 +1,5 @@
-use super::errors::CustomError;
-use super::models::Course;
+use super::super::errors::CustomError;
+use super::super::models::courses::Course;
 use sqlx::postgres::PgPool;
 
 pub async fn get_all(pool: &PgPool) -> Result<Vec<Course>, CustomError> {

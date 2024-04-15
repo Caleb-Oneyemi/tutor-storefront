@@ -3,20 +3,20 @@ use slog::info;
 use sqlx::postgres::PgPool;
 use std::{env, io, sync::Mutex};
 
+#[path = "../handlers/mod.rs"]
+mod handlers;
+
+#[path = "../models/mod.rs"]
+mod models;
+
+#[path = "../data/mod.rs"]
+mod data;
+
 #[path = "../state.rs"]
 mod state;
 
-#[path = "../handlers.rs"]
-mod handlers;
-
 #[path = "../routes.rs"]
 mod routes;
-
-#[path = "../models.rs"]
-mod models;
-
-#[path = "../data.rs"]
-mod data;
 
 #[path = "../errors.rs"]
 mod errors;

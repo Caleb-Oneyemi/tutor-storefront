@@ -1,10 +1,10 @@
-use super::errors::CustomError;
-use super::models::Course;
-use super::state::AppState;
+use super::super::errors::CustomError;
+use super::super::models::courses::Course;
+use super::super::state::AppState;
 use actix_web::{web, HttpResponse};
 use slog::info;
 
-use super::data as courses;
+use super::super::data::courses;
 
 pub async fn health_check(app_state: web::Data<AppState>) -> Result<HttpResponse, CustomError> {
     info!(app_state.logger, "calling health check...");
