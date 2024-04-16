@@ -1,75 +1,47 @@
 use super::super::errors::CustomError;
-use super::super::models::courses::Course;
+use super::super::models::courses::*;
 use sqlx::postgres::PgPool;
 
 pub async fn get_all(pool: &PgPool) -> Result<Vec<Course>, CustomError> {
-    let db_rows = sqlx::query!("SELECT * from tutor_storefront")
+    let db_rows = sqlx::query_as!(Course, "SELECT * from courses order by id DESC")
         .fetch_all(pool)
         .await?;
 
-    let courses = db_rows
-        .iter()
-        .map(|c| Course {
-            id: Some(c.id),
-            tutor_id: c.tutor_id,
-            name: c.name.clone(),
-            created_at: Some(chrono::NaiveDateTime::from(c.created_at.unwrap())),
-        })
-        .collect();
-
-    Ok(courses)
+    Ok(db_rows)
 }
 
 pub async fn get_by_tutor(pool: &PgPool, tutor_id: i32) -> Result<Vec<Course>, CustomError> {
-    let db_rows = sqlx::query!(
-        "SELECT * from tutor_storefront where tutor_id = ($1)",
+    let db_rows = sqlx::query_as!(
+        Course,
+        "SELECT * from courses where tutor_id = ($1)",
         tutor_id
     )
     .fetch_all(pool)
     .await?;
 
-    let courses = db_rows
-        .iter()
-        .map(|c| Course {
-            id: Some(c.id),
-            tutor_id: c.tutor_id,
-            name: c.name.clone(),
-            created_at: c.created_at,
-        })
-        .collect();
-
-    Ok(courses)
+    Ok(db_rows)
 }
 
-pub async fn create(pool: &PgPool, new_course: Course) -> Result<Course, CustomError> {
-    let course = sqlx::query!(
-        "INSERT INTO tutor_storefront (tutor_id, name) values ($1, $2) returning id, tutor_id, name, created_at",
-        new_course.tutor_id,
-        new_course.name
+pub async fn create(pool: &PgPool, data: CreateCourse) -> Result<Course, CustomError> {
+    let course= sqlx::query_as!(
+        Course,
+        "INSERT INTO courses (tutor_id, name, description, duration, level, format, language, structure, price) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) 
+        returning id, tutor_id, name, description, duration, level, format, language, structure, price, created_at, updated_at", 
+        data.tutor_id, data.name, data.description, data.duration, data.level, data.format, data.language, data.structure, data.price,
     )
     .fetch_one(pool)
     .await?;
 
-    Ok(Course {
-        id: Some(course.id),
-        tutor_id: course.tutor_id,
-        name: course.name,
-        created_at: course.created_at,
-    })
+    Ok(course)
 }
 
-pub async fn get_by_course_id(pool: &PgPool, course_id: i32) -> Result<Course, CustomError> {
-    let db_row = sqlx::query!("SELECT * FROM tutor_storefront where id = $1", course_id,)
+pub async fn get_by_id(pool: &PgPool, id: i32) -> Result<Course, CustomError> {
+    let db_row = sqlx::query_as!(Course, "SELECT * FROM courses where id = $1", id,)
         .fetch_one(pool)
         .await;
 
     match db_row {
         Err(_) => Err(CustomError::NotFoundError("course not found".to_string())),
-        Ok(res) => Ok(Course {
-            id: Some(res.id),
-            tutor_id: res.tutor_id,
-            name: res.name.clone(),
-            created_at: Some(res.created_at.unwrap()),
-        }),
+        Ok(res) => Ok(res),
     }
 }
