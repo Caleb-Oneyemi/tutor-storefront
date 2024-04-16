@@ -11,6 +11,7 @@ pub fn course_router(cfg: &mut web::ServiceConfig) {
             .route("", web::post().to(courses::create))
             .route("", web::get().to(courses::get_all))
             .route("/{id}", web::get().to(courses::get_by_id))
+            .route("/{id}", web::put().to(courses::update_by_id))
             .route("/{id}", web::delete().to(courses::delete_one))
             .route(
                 "/tutor/{tutor_id}",

@@ -6,8 +6,8 @@ use actix_web::{web, HttpResponse};
 use slog::info;
 
 pub async fn create(
-    new_course: web::Json<CreateCourse>,
     app_state: web::Data<AppState>,
+    new_course: web::Json<CreateCourse>,
 ) -> Result<HttpResponse, CustomError> {
     info!(
         app_state.logger,
@@ -63,6 +63,20 @@ pub async fn delete_one(
     let id = path.into_inner();
 
     courses::delete_one(&app_state.db, id)
+        .await
+        .map(|res| HttpResponse::Ok().json(res))
+}
+
+pub async fn update_by_id(
+    app_state: web::Data<AppState>,
+    details: web::Json<UpdateCourse>,
+    path: web::Path<i32>,
+) -> Result<HttpResponse, CustomError> {
+    let id = path.into_inner();
+
+    let existing_course = courses::get_by_id(&app_state.db, id).await?;
+
+    courses::update_by_id(&app_state.db, id, existing_course, details.into())
         .await
         .map(|res| HttpResponse::Ok().json(res))
 }
