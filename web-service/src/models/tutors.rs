@@ -1,4 +1,5 @@
 use actix_web::web;
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize)]
@@ -7,6 +8,7 @@ pub struct Tutor {
     pub name: String,
     pub bio: String,
     pub photo_url: String,
+    pub created_at: Option<NaiveDateTime>,
 }
 
 #[derive(Clone, Debug, Deserialize)]

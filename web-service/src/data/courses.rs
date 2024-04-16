@@ -110,7 +110,7 @@ pub async fn update_by_id(
     };
 
     let updated_at = Utc::now().naive_utc();
-    let db_row = sqlx::query_as!(
+    let db_res = sqlx::query_as!(
         Course,
         "UPDATE courses set name = $1, description = $2, format = $3, 
         structure = $4, duration = $5, price = $6, language = $7, 
@@ -131,5 +131,5 @@ pub async fn update_by_id(
     .fetch_one(pool)
     .await?;
 
-    Ok(db_row)
+    Ok(db_res)
 }
