@@ -51,6 +51,7 @@ async fn main() -> io::Result<()> {
             .app_data(shared_data.clone())
             .configure(base_router)
             .configure(course_router)
+            .configure(tutor_router)
     };
 
     let server = HttpServer::new(app).bind(addr)?.run().await;

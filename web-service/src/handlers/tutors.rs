@@ -8,7 +8,7 @@ use crate::{
     state::AppState,
 };
 
-pub async fn get_all(app_state: AppState) -> Result<HttpResponse, CustomError> {
+pub async fn get_all(app_state: web::Data<AppState>) -> Result<HttpResponse, CustomError> {
     info!(app_state.logger, "calling get all tutors...");
 
     tutors::get_all(&app_state.db)
@@ -17,7 +17,7 @@ pub async fn get_all(app_state: AppState) -> Result<HttpResponse, CustomError> {
 }
 
 pub async fn create(
-    app_state: AppState,
+    app_state: web::Data<AppState>,
     data: web::Json<CreateTutor>,
 ) -> Result<HttpResponse, CustomError> {
     info!(
@@ -30,8 +30,8 @@ pub async fn create(
         .map(|res| HttpResponse::Ok().json(res))
 }
 
-pub async fn get_tutor_by_id(
-    app_state: AppState,
+pub async fn get_by_id(
+    app_state: web::Data<AppState>,
     path: web::Path<i32>,
 ) -> Result<HttpResponse, CustomError> {
     let id = path.into_inner();
@@ -43,8 +43,8 @@ pub async fn get_tutor_by_id(
         .map(|res| HttpResponse::Ok().json(res))
 }
 
-pub async fn update_tutor(
-    app_state: AppState,
+pub async fn update(
+    app_state: web::Data<AppState>,
     path: web::Path<i32>,
     data: web::Json<UpdateTutor>,
 ) -> Result<HttpResponse, CustomError> {

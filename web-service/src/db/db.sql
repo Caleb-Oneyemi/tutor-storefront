@@ -4,8 +4,8 @@ drop table if exists tutors;
 create table tutors (
     id serial primary key,
     name varchar(200) not null,
-    photo_url varchar(200) not null,
     bio varchar(2000) not null,
+    photo_url varchar(200),
     created_at TIMESTAMP default now()
 );
 

@@ -55,7 +55,7 @@ pub async fn update(
     let photo_url: String = if let Some(photo_url) = details.photo_url {
         photo_url
     } else {
-        existing_tutor.photo_url
+        existing_tutor.photo_url.unwrap_or_default()
     };
 
     let db_res = sqlx::query_as!(Tutor, "UPDATE tutors set name = $1, bio = $2, photo_url = $3 where id = $4 returning id, name, bio, photo_url, created_at", name, bio, photo_url, id)

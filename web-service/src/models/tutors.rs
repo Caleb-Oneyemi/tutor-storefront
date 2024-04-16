@@ -7,7 +7,7 @@ pub struct Tutor {
     pub id: i32,
     pub name: String,
     pub bio: String,
-    pub photo_url: String,
+    pub photo_url: Option<String>,
     pub created_at: Option<NaiveDateTime>,
 }
 
