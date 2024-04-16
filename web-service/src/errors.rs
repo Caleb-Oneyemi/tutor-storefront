@@ -8,6 +8,7 @@ pub enum CustomError {
     ActixError(String),
     DbError(String),
     NotFoundError(String),
+    InvalidInput(String),
 }
 
 #[derive(Debug, Serialize)]
@@ -32,6 +33,10 @@ impl CustomError {
                 println!("Not Found Error: {:?}", msg);
                 msg.into()
             }
+            CustomError::InvalidInput(msg) => {
+                println!("Invalid parameters received: {:?}", msg);
+                msg.into()
+            }
         }
     }
 }
@@ -49,6 +54,7 @@ impl error::ResponseError for CustomError {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
             CustomError::NotFoundError(_) => StatusCode::NOT_FOUND,
+            CustomError::InvalidInput(_) => StatusCode::BAD_REQUEST,
         }
     }
 

@@ -29,6 +29,8 @@ use logger::get_logger;
 use routes::*;
 use state::AppState;
 
+use crate::errors::CustomError;
+
 #[actix_web::main]
 async fn main() -> io::Result<()> {
     dotenv().ok();
@@ -49,6 +51,9 @@ async fn main() -> io::Result<()> {
     let app = move || {
         App::new()
             .app_data(shared_data.clone())
+            .app_data(web::JsonConfig::default().error_handler(|_, _| {
+                CustomError::InvalidInput("invalid json".to_string()).into()
+            }))
             .configure(base_router)
             .configure(course_router)
             .configure(tutor_router)
