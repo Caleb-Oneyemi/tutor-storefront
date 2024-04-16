@@ -27,7 +27,7 @@ pub async fn get_all(app_state: web::Data<AppState>) -> Result<HttpResponse, Cus
         .map(|res| HttpResponse::Ok().json(res))
 }
 
-pub async fn get_by_tutor(
+pub async fn get_all_by_tutor(
     app_state: web::Data<AppState>,
     path: web::Path<i32>,
 ) -> Result<HttpResponse, CustomError> {
@@ -52,6 +52,17 @@ pub async fn get_by_id(
     info!(app_state.logger, "calling get course by id {}...", id);
 
     courses::get_by_id(&app_state.db, id)
+        .await
+        .map(|res| HttpResponse::Ok().json(res))
+}
+
+pub async fn delete_one(
+    app_state: web::Data<AppState>,
+    path: web::Path<i32>,
+) -> Result<HttpResponse, CustomError> {
+    let id = path.into_inner();
+
+    courses::delete_one(&app_state.db, id)
         .await
         .map(|res| HttpResponse::Ok().json(res))
 }

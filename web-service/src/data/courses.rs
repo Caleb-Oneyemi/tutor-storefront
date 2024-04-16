@@ -45,3 +45,11 @@ pub async fn get_by_id(pool: &PgPool, id: i32) -> Result<Course, CustomError> {
         Ok(res) => Ok(res),
     }
 }
+
+pub async fn delete_one(pool: &PgPool, id: i32) -> Result<String, CustomError> {
+    let db_res = sqlx::query!("DELETE FROM courses where id = $1", id)
+        .execute(pool)
+        .await?;
+
+    Ok(format!("Deleted {} records", db_res.rows_affected()))
+}
