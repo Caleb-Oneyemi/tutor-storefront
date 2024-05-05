@@ -1,6 +1,6 @@
 # tutor storefront
 
-A WIP server side rendered web app built with rust.
+A sample Web API built with rust.
 
 ## Stack:
 
